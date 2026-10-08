@@ -6,22 +6,22 @@ import re
 import streamlit as st
 
 from src.motifs import CompiledMotif, compile_motifs
-from src.models.dataclasses import PerplexityConfig
+from src.models.dataclasses import PerplexityConfig, PredictionResult
 from src.prediction.regulatory_predictor import predict_regulatory_regions
 from src.preprocessing.input_sources import InputSourceError, list_local_input_files, load_sequence_records
 
 
-@st.cache_resource(show_spinner=False)
+@st.cache_resource(show_spinner=False, max_entries=32)
 def _cached_compiled_motifs(motif_text: str) -> tuple[CompiledMotif, ...]:
     return tuple(compile_motifs(motif_text))
 
 
-@st.cache_data(show_spinner="Analyzing sequences...")
+@st.cache_data(show_spinner="Analyzing sequences...", max_entries=16)
 def _cached_predict_records(
     records: tuple[tuple[str, str], ...],
     config: PerplexityConfig,
     motif_text: str,
-):
+) -> list[PredictionResult]:
     compiled_motifs = list(_cached_compiled_motifs(motif_text))
     return [
         predict_regulatory_regions(
