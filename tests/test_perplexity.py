@@ -22,3 +22,9 @@ def test_single_dinucleotide_low_perplexity():
     finite = profile.raw_perplexity[np.isfinite(profile.raw_perplexity)]
     assert finite.size > 0
     assert np.allclose(finite, 1.0)
+
+
+def test_large_window_counts_do_not_overflow():
+    cfg = PerplexityConfig(perplexity_window=40_000)
+    profile = calculate_perplexity_profile("A" * 40_001, cfg)
+    assert np.allclose(profile.raw_perplexity, 1.0)
