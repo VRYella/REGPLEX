@@ -9,6 +9,8 @@ from app.pages.download import render_download_page
 from app.pages.results import render_results_page
 from app.pages.visualization import render_visualization_page
 
+from src.models.dataclasses import PredictionResult
+
 
 def _inject_styles() -> None:
     css_path = Path(__file__).resolve().parents[1] / "styles.css"
@@ -58,24 +60,36 @@ def main() -> None:
 
     render_analyze_page()
 
-    st.markdown(
-        """
+    results = st.session_state.get("analysis_results", [])
+    if results:
+        selected_sequence_id = st.selectbox(
+            "Sequence to explore",
+            [result.sequence_id for result in results],
+            key="workspace_sequence",
+        )
+        selected_result = next(
+            result for result in results if result.sequence_id == selected_sequence_id
+        )
+        st.markdown(
+            """
 <div class="section-header">
   <span class="section-title">Analysis workspace</span>
   <span class="section-subtitle">Review, explore, and export your results without leaving this page</span>
 </div>
 """,
-        unsafe_allow_html=True,
-    )
-    results_tab, visualization_tab, download_tab = st.tabs(
-        ["Results", "Visualize", "Export"]
-    )
-    with results_tab:
-        render_results_page()
-    with visualization_tab:
-        render_visualization_page()
-    with download_tab:
-        render_download_page()
+            unsafe_allow_html=True,
+        )
+        results_tab, visualization_tab, download_tab = st.tabs(
+            ["Results", "Visualize", "Export"]
+        )
+        with results_tab:
+            render_results_page(selected_result)
+        with visualization_tab:
+            render_visualization_page(selected_result)
+        with download_tab:
+            render_download_page(selected_result)
+    else:
+        st.info("Load a DNA sequence and run an analysis to explore results here.")
 
     with st.expander("How to interpret REGPLEX"):
         st.markdown(
