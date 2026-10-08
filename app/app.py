@@ -61,7 +61,7 @@ def main() -> None:
         unsafe_allow_html=True,
     )
 
-    page = st.radio("Page", PAGES, horizontal=True, label_visibility="collapsed")
+    page = st.radio("Page", PAGES, horizontal=True, label_visibility="collapsed", key="page")
 
     if page == "Home":
         render_home_page()

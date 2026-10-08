@@ -31,19 +31,19 @@ def render_download_page() -> None:
     st.markdown('<div class="section-subtitle">Export REGPLEX calls with motif annotations for downstream genomics workflows</div>', unsafe_allow_html=True)
     d1, d2, d3, d4 = st.columns(4)
     with d1:
-        st.download_button("Download CSV", export_csv(df), file_name="regplex_regions.csv", mime="text/csv", use_container_width=True)
+        st.download_button("Download CSV", export_csv(df), file_name="regplex_regions.csv", mime="text/csv", width="stretch")
     with d2:
-        st.download_button("Download BED", export_bed(df), file_name="regplex_regions.bed", mime="text/plain", use_container_width=True)
+        st.download_button("Download BED", export_bed(df), file_name="regplex_regions.bed", mime="text/plain", width="stretch")
     with d3:
-        st.download_button("Download GFF3", export_gff(df), file_name="regplex_regions.gff3", mime="text/plain", use_container_width=True)
+        st.download_button("Download GFF3", export_gff(df), file_name="regplex_regions.gff3", mime="text/plain", width="stretch")
     with d4:
         st.download_button(
             "Download FASTA",
             export_region_fasta(df, source_sequence),
             file_name="regplex_regions.fasta",
             mime="text/plain",
-            use_container_width=True,
+            width="stretch",
         )
 
     st.markdown("#### Preview")
-    st.dataframe(df, hide_index=True, use_container_width=True)
+    st.dataframe(df, hide_index=True, width="stretch")

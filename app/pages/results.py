@@ -38,7 +38,7 @@ def render_results_page() -> None:
     with c4:
         st.metric("Top motif hits", top_motif_hits)
 
-    st.dataframe(df, use_container_width=True, hide_index=True)
+    st.dataframe(df, width="stretch", hide_index=True)
     st.markdown("#### Why these regions were predicted")
     for region in result.candidate_regions:
         with st.expander(f"Region {sequence_id}:{region.start}-{region.end}", expanded=False):
