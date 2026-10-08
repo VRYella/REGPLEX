@@ -16,10 +16,15 @@ def calculate_perplexity_profile(sequence: str, config: PerplexityConfig) -> Per
     ambiguous = has_ambiguous_base(sequence, config.perplexity_window, config.step_size)
     dinucleotide_indices = encode_dinucleotides(sequence, config.perplexity_window, config.step_size)
 
-    counts = np.zeros((len(dinucleotide_indices), 16), dtype=np.int16)
     valid_rows = np.flatnonzero(~ambiguous)
     if valid_rows.size:
-        np.add.at(counts, (valid_rows[:, None], dinucleotide_indices[valid_rows]), 1)
+        flat_indices = valid_rows[:, None] * 16 + dinucleotide_indices[valid_rows]
+        counts = np.bincount(
+            flat_indices.ravel(),
+            minlength=len(dinucleotide_indices) * 16,
+        ).reshape(-1, 16)
+    else:
+        counts = np.zeros((len(dinucleotide_indices), 16), dtype=np.int64)
 
     probs = counts / max(config.perplexity_window - 1, 1)
     entropy = shannon_entropy(probs)

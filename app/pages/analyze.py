@@ -5,10 +5,33 @@ import re
 
 import streamlit as st
 
-from src.motifs import compile_motifs, load_motifs_from_path
-from src.models.dataclasses import PerplexityConfig
+from src.motifs import CompiledMotif, compile_motifs
+from src.models.dataclasses import PerplexityConfig, PredictionResult
 from src.prediction.regulatory_predictor import predict_regulatory_regions
 from src.preprocessing.input_sources import InputSourceError, list_local_input_files, load_sequence_records
+
+
+@st.cache_resource(show_spinner=False, max_entries=32)
+def _cached_compiled_motifs(motif_text: str) -> tuple[CompiledMotif, ...]:
+    return tuple(compile_motifs(motif_text))
+
+
+@st.cache_data(show_spinner="Analyzing sequences...", max_entries=16)
+def _cached_predict_records(
+    records: tuple[tuple[str, str], ...],
+    config: PerplexityConfig,
+    motif_text: str,
+) -> list[PredictionResult]:
+    compiled_motifs = list(_cached_compiled_motifs(motif_text))
+    return [
+        predict_regulatory_regions(
+            sequence_id=header,
+            sequence=sequence,
+            config=config,
+            compiled_motifs=compiled_motifs or None,
+        )
+        for header, sequence in records
+    ]
 
 
 def render_analyze_page() -> None:
@@ -91,14 +114,16 @@ def render_analyze_page() -> None:
             st.error(str(exc))
             return
 
-        compiled_motifs = []
+        motif_sources = []
         if use_default_library:
-            compiled_motifs.extend(load_motifs_from_path(default_motif_path))
+            motif_sources.append(default_motif_path.read_text(encoding="utf-8"))
         try:
             if uploaded_motif_file is not None:
-                compiled_motifs.extend(compile_motifs(uploaded_motif_file.getvalue().decode("utf-8")))
+                motif_sources.append(uploaded_motif_file.getvalue().decode("utf-8"))
             if custom_motifs.strip():
-                compiled_motifs.extend(compile_motifs(custom_motifs))
+                motif_sources.append(custom_motifs)
+            motif_text = "\n".join(motif_sources)
+            _cached_compiled_motifs(motif_text)
         except (OSError, UnicodeDecodeError, re.error, ValueError) as exc:
             st.error(f"Unable to compile motif library: {exc}")
             return
@@ -115,12 +140,9 @@ def render_analyze_page() -> None:
             min_persistence_bp=int(persistence),
             merge_distance=int(merge_distance),
         )
-        results = [
-            predict_regulatory_regions(sequence_id=h, sequence=s, config=config, compiled_motifs=compiled_motifs or None)
-            for h, s in records
-        ]
+        results = _cached_predict_records(tuple(records), config, motif_text)
         st.session_state["analysis_results"] = results
         st.session_state["analysis_records"] = records
         st.session_state["analysis_source_label"] = source_label
-        st.session_state["analysis_motif_count"] = len(compiled_motifs)
+        st.session_state["analysis_motif_count"] = len(_cached_compiled_motifs(motif_text))
         st.success(f"Processed {len(results)} sequence(s) from {source_label}.")
