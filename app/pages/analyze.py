@@ -100,7 +100,7 @@ def render_analyze_page() -> None:
             with a3:
                 flank_size = st.number_input("Flank size", min_value=5, max_value=2000, value=100)
 
-        run_analysis = st.form_submit_button("Run analysis", type="primary", use_container_width=True)
+        run_analysis = st.form_submit_button("Run analysis", type="primary", width="stretch")
 
     if run_analysis:
         try:
@@ -145,4 +145,4 @@ def render_analyze_page() -> None:
         st.session_state["analysis_records"] = records
         st.session_state["analysis_source_label"] = source_label
         st.session_state["analysis_motif_count"] = len(_cached_compiled_motifs(motif_text))
-        st.success(f"Processed {len(results)} sequence(s) from {source_label}.")
+        st.success(f"Processed {len(results)} sequence(s) from {source_label}. Open Results, Visualization, or Download to continue.")

@@ -47,13 +47,13 @@ def render_visualization_page() -> None:
 
     tabs = st.tabs(["Profile & Regions", "PDS Distribution", "Region Quality", "Motif Burden"])
     with tabs[0]:
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch")
     with tabs[1]:
         pds_frame = pd.DataFrame({"PDS": result.pds})
         pds_frame = pds_frame[pds_frame["PDS"].notna()]
         pds_hist = px.histogram(pds_frame, x="PDS", nbins=50, color_discrete_sequence=["#1E3A8A"])
         pds_hist.update_layout(template="plotly_white", height=460, margin=dict(l=20, r=20, t=40, b=20))
-        st.plotly_chart(pds_hist, use_container_width=True)
+        st.plotly_chart(pds_hist, width="stretch")
     with tabs[2]:
         quality = pd.DataFrame(
             [
@@ -73,13 +73,13 @@ def render_visualization_page() -> None:
                 color_continuous_scale="Tealgrn",
             )
             scatter.update_layout(template="plotly_white", height=460, margin=dict(l=20, r=20, t=40, b=20))
-            st.plotly_chart(scatter, use_container_width=True)
-            st.dataframe(quality, hide_index=True, use_container_width=True)
+            st.plotly_chart(scatter, width="stretch")
+            st.dataframe(quality, hide_index=True, width="stretch")
     with tabs[3]:
         if motif_df.empty or not motif_df["Motif_Count"].any():
             st.info("No motif hits were detected with the active motif library.")
         else:
             motif_bar = px.bar(motif_df, x="Region", y="Motif_Count", hover_data=["Motifs"], color="Motif_Count", color_continuous_scale="Tealgrn")
             motif_bar.update_layout(template="plotly_white", height=460, margin=dict(l=20, r=20, t=40, b=20))
-            st.plotly_chart(motif_bar, use_container_width=True)
-            st.dataframe(motif_df, hide_index=True, use_container_width=True)
+            st.plotly_chart(motif_bar, width="stretch")
+            st.dataframe(motif_df, hide_index=True, width="stretch")
