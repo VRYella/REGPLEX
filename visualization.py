@@ -8,18 +8,18 @@ _BG = "#ffffff"
 _GRID = "rgba(148,163,184,0.22)"
 _TEXT = "#1f2937"
 _MUTED = "#475569"
-_BLUE = "#1E3A8A"
-_TEAL = "#0F766E"
-_GREEN = "#10B981"
-_AMBER = "#F59E0B"
+_BLUE = "#0072B2"
+_TEAL = "#56B4E9"
+_GREEN = "#009E73"
+_AMBER = "#FBBF24"
 _CRIMSON = "#DC2626"
-_INDIGO = "#4F46E5"
+_INDIGO = "#0284C7"
 
 _BASE_LAYOUT = dict(
     paper_bgcolor=_BG,
     plot_bgcolor=_BG,
     font=dict(color=_TEXT, family="Inter, Segoe UI, sans-serif", size=17),
-    title_font=dict(size=25, color=_BLUE, family="Space Grotesk, Inter, sans-serif"),
+    title_font=dict(size=25, color=_BLUE, family="Plus Jakarta Sans, Inter, sans-serif"),
     margin=dict(l=72, r=36, t=72, b=60),
     legend=dict(bgcolor="rgba(255,255,255,0.9)", bordercolor="rgba(0,0,0,0)", borderwidth=0, font=dict(size=16)),
     hoverlabel=dict(font=dict(size=15)),
@@ -50,7 +50,7 @@ def _add_region_shading(fig: go.Figure, regions: list[dict]) -> None:
         fig.add_vrect(
             x0=s0,
             x1=s1,
-            fillcolor="rgba(30,58,138,0.12)",
+            fillcolor="rgba(0,114,178,0.12)",
             line_color=_BLUE,
             line_width=0.8,
             opacity=0.8,
@@ -113,8 +113,8 @@ def plot_three_window(smoothed_di: np.ndarray, pds: np.ndarray, region: dict, fl
     if len(pds) > 0:
         pds_slice = pds[x0_plot:x1_plot + 1].astype(float)
         pos_pds = np.where(pds_slice > 0, pds_slice, 0.0)
-        fig.add_trace(go.Scatter(x=x_range, y=pos_pds, mode="lines", name="PDS", line=dict(color=_GREEN, width=2), fill="tozeroy", fillcolor="rgba(16,185,129,0.18)"), row=2, col=1)
-        fig.add_vrect(x0=s0, x1=s1, fillcolor="rgba(30,58,138,0.12)", line_width=0, row=2, col=1)
+        fig.add_trace(go.Scatter(x=x_range, y=pos_pds, mode="lines", name="PDS", line=dict(color=_GREEN, width=2), fill="tozeroy", fillcolor="rgba(0,158,115,0.18)"), row=2, col=1)
+        fig.add_vrect(x0=s0, x1=s1, fillcolor="rgba(0,114,178,0.12)", line_width=0, row=2, col=1)
         fig.add_hline(y=0, line=dict(color=_GRID, dash="dot"), row=2, col=1)
 
     fig.update_yaxes(title_text="Perplexity", row=1, col=1)
@@ -133,7 +133,7 @@ def plot_pds_landscape(pds: np.ndarray, regions: list[dict]) -> go.Figure:
     fig = go.Figure()
     fig.add_hline(y=0, line=dict(color=_GRID, dash="dot"))
     fig.add_trace(go.Scatter(x=np.arange(len(pds)), y=pds_f, mode="lines", name="PDS", line=dict(color=_TEAL, width=1.3), opacity=0.55))
-    fig.add_trace(go.Scatter(x=np.arange(len(pds)), y=pos, mode="lines", name="PDS (positive)", line=dict(color=_GREEN, width=2.0), fill="tozeroy", fillcolor="rgba(16,185,129,0.15)"))
+    fig.add_trace(go.Scatter(x=np.arange(len(pds)), y=pos, mode="lines", name="PDS (positive)", line=dict(color=_GREEN, width=2.0), fill="tozeroy", fillcolor="rgba(0,158,115,0.15)"))
     _add_region_shading(fig, regions)
     fig.update_layout(xaxis_title="Signal position (nt)", yaxis_title="PDS")
     return _apply_base(fig, "Perplexity Depression Score (PDS)", height=410)
@@ -151,7 +151,7 @@ def plot_region_ranking(regions: list[dict]) -> go.Figure:
     fig = go.Figure(go.Bar(
         x=ids,
         y=scores,
-        marker=dict(color=pds, colorscale=[[0.0, "#e0e7ff"], [0.5, _TEAL], [1.0, _BLUE]], colorbar=dict(title="Perplexity Depression Score")),
+        marker=dict(color=pds, colorscale=[[0.0, "#e0f2fe"], [0.5, _TEAL], [1.0, _BLUE]], colorbar=dict(title="Perplexity Depression Score")),
         customdata=np.array([[l, p] for l, p in zip(lens, pds)], dtype=object),
         hovertemplate="<b>%{x}</b><br>Region_Score: %{y:.4f}<br>Length: %{customdata[0]} bp<br>PDS: %{customdata[1]:.4f}<extra></extra>",
     ))
@@ -202,7 +202,7 @@ def plot_mean_perplexity_profile(stats) -> go.Figure:
         x=np.concatenate([x, x[::-1]]),
         y=np.concatenate([mu + sd, (mu - sd)[::-1]]),
         fill="toself",
-        fillcolor="rgba(30,58,138,0.12)",
+        fillcolor="rgba(0,114,178,0.12)",
         line=dict(color="rgba(0,0,0,0)"),
         showlegend=True,
         name="± SD",
@@ -252,7 +252,7 @@ def plot_mean_pds_profile(stats) -> go.Figure:
         name="Mean PDS (positive)",
         line=dict(color=_GREEN, width=2.0),
         fill="tozeroy",
-        fillcolor="rgba(16,185,129,0.15)",
+        fillcolor="rgba(0,158,115,0.15)",
     ))
     fig.add_trace(go.Scatter(
         x=x, y=mu, mode="lines",
@@ -462,7 +462,7 @@ def plot_motif_frequency_barplot(consensus_lprs, top_n: int = 15) -> go.Figure:
 
     fig = go.Figure(go.Bar(
         x=freqs, y=labels, orientation="h",
-        marker=dict(color=freqs, colorscale=[[0, "#e0e7ff"], [1, _INDIGO]],
+        marker=dict(color=freqs, colorscale=[[0, "#e0f2fe"], [1, _INDIGO]],
                     colorbar=dict(title="Frequency")),
         hovertemplate="%{y}: %{x:.3f}<extra></extra>",
     ))
