@@ -61,12 +61,10 @@ src/
 app/
   app.py
   pages/
-    home.py
     analyze.py
     results.py
     visualization.py
     download.py
-    help.py
 
 tests/
   test_entropy.py
