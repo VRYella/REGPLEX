@@ -8,7 +8,7 @@ import streamlit as st
 from src.motifs import CompiledMotif, compile_motifs
 from src.models.dataclasses import PerplexityConfig, PredictionResult
 from src.prediction.regulatory_predictor import predict_regulatory_regions
-from src.preprocessing.input_sources import InputSourceError, list_local_input_files, load_sequence_records
+from src.preprocessing.input_sources import PRESET_ACCESSIONS, InputSourceError, list_local_input_files, load_sequence_records
 
 
 @st.cache_resource(show_spinner=False, max_entries=32)
@@ -44,7 +44,7 @@ def render_analyze_page() -> None:
     default_motif_path = Path(__file__).resolve().parents[2] / "regulatory_motifs.txt"
 
     with st.form("analysis_form", clear_on_submit=False):
-        input_source = st.radio("Sequence source", ["Paste sequence", "Upload file", "Disk file", "NCBI accession"], horizontal=True)
+        input_source = st.radio("Sequence source", ["Paste sequence", "Upload file", "Disk file", "NCBI accession", "Preset example"], horizontal=True)
         fasta_text = ""
         uploaded_file = None
         disk_path = ""
@@ -59,8 +59,16 @@ def render_analyze_page() -> None:
                 disk_path = st.selectbox("Indexed absolute file path", local_files)
             else:
                 st.info("No indexed local FASTA/text files were found under the workspace or /tmp.")
+        elif input_source == "Preset example":
+            preset = st.selectbox("Preset workbook", list(PRESET_ACCESSIONS), help="Fetched from NCBI when you run the analysis.")
+            accession = PRESET_ACCESSIONS[preset]
         else:
-            accession = st.text_input("NCBI nucleotide accession", placeholder="NC_000913.3")
+            accession = st.text_area(
+                "NCBI nucleotide accession(s)",
+                height=80,
+                placeholder="NC_000913.3\nNC_001416.1",
+                help="One or more accessions separated by commas, spaces, or new lines; each is analyzed as a batch.",
+            )
 
         st.markdown("#### Regulatory motif library")
         use_default_library = st.checkbox("Use bundled regulatory_motifs.txt library", value=True)
@@ -74,7 +82,8 @@ def render_analyze_page() -> None:
         st.markdown("#### Analysis geometry")
         c1, c2, c3, c4 = st.columns(4)
         with c1:
-            perplexity_window = st.number_input("Perplexity window", min_value=5, max_value=200, value=17)
+            perplexity_window = st.number_input("Perplexity window", min_value=5, max_value=200, value=17,
+                help="Sliding window for k-mer perplexity. Smaller windows are more sensitive to short motifs but noisier; larger windows smooth noise but can miss short elements.")
         with c2:
             step_size = st.number_input("Step size", min_value=1, max_value=20, value=1)
         with c3:
@@ -85,9 +94,11 @@ def render_analyze_page() -> None:
         st.markdown("#### Detection controls")
         d1, d2, d3 = st.columns(3)
         with d1:
-            min_pds = st.number_input("Minimum PDS", min_value=0.0, max_value=10.0, value=0.25, step=0.05)
+            min_pds = st.number_input("Minimum PDS", min_value=0.0, max_value=10.0, value=0.25, step=0.05,
+                help="Minimum perplexity depression score versus flanks. Higher values give fewer, more confident low-complexity regions; lower values increase sensitivity and false positives.")
         with d2:
-            persistence = st.number_input("Persistence (bp)", min_value=10, max_value=5000, value=80)
+            persistence = st.number_input("Persistence (bp)", min_value=10, max_value=5000, value=80,
+                help="Minimum length (bp) a depression must persist to be called. Longer values suppress isolated dips.")
         with d3:
             merge_distance = st.number_input("Merge distance", min_value=0, max_value=5000, value=100)
 

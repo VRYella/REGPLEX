@@ -23,3 +23,9 @@ def test_load_sequence_records_requires_one_source():
         assert "indexed local file" in str(exc)
     else:
         raise AssertionError("Expected InputSourceError")
+
+
+def test_split_accessions_dedupes_and_splits():
+    from src.preprocessing.input_sources import split_accessions
+
+    assert split_accessions("A1, B2\nA1;C3") == ["A1", "B2", "C3"]
