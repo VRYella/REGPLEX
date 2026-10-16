@@ -43,7 +43,7 @@ def render_visualization_page(result: PredictionResult) -> None:
     with tabs[1]:
         pds_frame = pd.DataFrame({"PDS": result.pds})
         pds_frame = pds_frame[pds_frame["PDS"].notna()]
-        pds_hist = px.histogram(pds_frame, x="PDS", nbins=50, color_discrete_sequence=["#1E3A8A"])
+        pds_hist = px.histogram(pds_frame, x="PDS", nbins=50, color_discrete_sequence=["#0072B2"])
         pds_hist.update_layout(template="plotly_white", height=460, margin=dict(l=20, r=20, t=40, b=20))
         st.plotly_chart(pds_hist, width="stretch")
     with tabs[2]:

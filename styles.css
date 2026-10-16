@@ -402,6 +402,84 @@ pre {
   line-height: 1.9;
 }
 
+/* NonBDNAFinder-style component chrome */
+:root { --primary-rgb: 2, 132, 199; }
+
+[data-testid="stExpander"] {
+  border: 2px solid rgba(var(--primary-rgb), 0.35);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 4px 24px rgba(var(--primary-rgb), 0.12);
+  transition: box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+[data-testid="stExpander"]:hover {
+  border-color: rgba(var(--primary-rgb), 0.65);
+  box-shadow: 0 6px 32px rgba(var(--primary-rgb), 0.2);
+}
+
+[data-testid="stAlert"] {
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  font-weight: 600;
+}
+
+[data-testid="stMetric"] {
+  border: 2px solid rgba(var(--primary-rgb), 0.3);
+  border-radius: 16px;
+  background: linear-gradient(135deg, #fff 0%, #e0f2fe 100%);
+  box-shadow: 0 4px 20px rgba(var(--primary-rgb), 0.12);
+  transition: all 0.25s ease;
+}
+
+[data-testid="stMetric"]:hover {
+  border-color: rgba(var(--primary-rgb), 0.55);
+  box-shadow: 0 8px 28px rgba(var(--primary-rgb), 0.2);
+  transform: translateY(-2px);
+}
+
+[data-testid="stMetricValue"] {
+  font-weight: 800;
+  font-size: 1.8rem;
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+[data-testid="stDataFrame"],
+[data-testid="stPlotlyChart"] {
+  border: 2px solid rgba(var(--primary-rgb), 0.25);
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(var(--primary-rgb), 0.1);
+}
+
+[data-testid="stFileUploader"] {
+  padding: 1rem;
+  border: 3px dashed rgba(var(--primary-rgb), 0.45);
+  border-radius: 16px;
+  background: #e0f2fe;
+  transition: all 0.3s ease;
+}
+
+[data-testid="stFileUploader"]:hover {
+  border-color: rgba(var(--primary-rgb), 0.75);
+  box-shadow: 0 0 28px rgba(var(--primary-rgb), 0.18);
+}
+
+.stTextInput input:focus,
+.stTextArea textarea:focus,
+.stSelectbox [data-baseweb="select"]:focus-within {
+  border-color: var(--indigo);
+  box-shadow: 0 0 0 2px rgba(var(--primary-rgb), 0.2);
+  outline: none;
+}
+
+.stButton > button[kind="primary"] {
+  border-radius: 10px;
+  font-weight: 800;
+}
+
 @media (max-width: 680px) {
   .block-container {
     padding: 0.7rem 0.8rem 2rem !important;
