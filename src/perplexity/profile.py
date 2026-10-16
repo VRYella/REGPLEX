@@ -8,11 +8,10 @@ from src.perplexity.dinucleotide import encode_dinucleotides, has_ambiguous_base
 from src.perplexity.entropy import perplexity_from_entropy, shannon_entropy
 
 
-def calculate_perplexity_profile(sequence: str, config: PerplexityConfig) -> PerplexityProfile:
-    if len(sequence) < config.perplexity_window:
-        empty = np.array([], dtype=np.float32)
-        return PerplexityProfile(positions=np.array([], dtype=np.int64), raw_perplexity=empty, smoothed_perplexity=empty)
+CHUNK_SIZE = 50_000
 
+
+def _raw_perplexity(sequence: str, config: PerplexityConfig) -> np.ndarray:
     ambiguous = has_ambiguous_base(sequence, config.perplexity_window, config.step_size)
     dinucleotide_indices = encode_dinucleotides(sequence, config.perplexity_window, config.step_size)
 
@@ -30,6 +29,30 @@ def calculate_perplexity_profile(sequence: str, config: PerplexityConfig) -> Per
     entropy = shannon_entropy(probs)
     raw = perplexity_from_entropy(entropy).astype(np.float32)
     raw[ambiguous] = np.nan
+    return raw
+
+
+def calculate_perplexity_profile(
+    sequence: str, config: PerplexityConfig, chunk_size: int = CHUNK_SIZE
+) -> PerplexityProfile:
+    if len(sequence) < config.perplexity_window:
+        empty = np.array([], dtype=np.float32)
+        return PerplexityProfile(positions=np.array([], dtype=np.int64), raw_perplexity=empty, smoothed_perplexity=empty)
+
+    window, step = config.perplexity_window, config.step_size
+    if len(sequence) <= chunk_size:
+        raw = _raw_perplexity(sequence, config)
+    else:
+        # Process long sequences in chunks of ~chunk_size nt; chunks overlap by
+        # window - step so every window is evaluated exactly once, unchanged.
+        n_windows = (len(sequence) - window) // step + 1
+        per_chunk = max(1, (chunk_size - window) // step + 1)
+        parts = []
+        for first in range(0, n_windows, per_chunk):
+            last = min(first + per_chunk, n_windows)
+            sub = sequence[first * step:(last - 1) * step + window]
+            parts.append(_raw_perplexity(sub, config))
+        raw = np.concatenate(parts)
 
     smoothed = smooth_profile(raw, config.smoothing_window, config.smoothing_poly_order)
     positions = np.arange(len(raw), dtype=np.int64) * config.step_size
