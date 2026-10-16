@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import re
 from urllib.parse import urlencode
 from urllib.request import urlopen
 
@@ -69,8 +70,26 @@ def fetch_ncbi_fasta(accession: str, timeout: float = 20.0) -> str:
     return payload
 
 
+PRESET_ACCESSIONS = {
+    "E. coli K-12 genome (NC_000913.3)": "NC_000913.3",
+    "Human TP53 gene region (NG_017013.2)": "NG_017013.2",
+    "Phage lambda genome (NC_001416.1)": "NC_001416.1",
+}
+
+
+def split_accessions(text: str) -> list[str]:
+    """Split a comma/whitespace separated accession list, preserving order and dropping duplicates."""
+    return list(dict.fromkeys(token for token in re.split(r"[\s,;]+", text) if token))
+
+
 def load_records_from_accession(accession: str) -> list[tuple[str, str]]:
-    return load_records_from_text(fetch_ncbi_fasta(accession))
+    accessions = split_accessions(accession)
+    if not accessions:
+        raise InputSourceError("NCBI accession is empty.")
+    records: list[tuple[str, str]] = []
+    for item in accessions:
+        records.extend(load_records_from_text(fetch_ncbi_fasta(item)))
+    return records
 
 
 def load_sequence_records(
