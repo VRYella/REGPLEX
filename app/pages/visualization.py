@@ -4,20 +4,12 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 
+from src.models.dataclasses import PredictionResult
 from src.visualization.profiles import plot_perplexity_background_pds
 from src.visualization.regions import add_region_highlights
 
 
-def render_visualization_page() -> None:
-    st.subheader("Visualization")
-    results = st.session_state.get("analysis_results", [])
-    if not results:
-        st.info("Run Analyze first.")
-        return
-
-    seq_ids = [result.sequence_id for result in results]
-    sequence_id = st.selectbox("Sequence", seq_ids, key="viz_sequence")
-    result = next(r for r in results if r.sequence_id == sequence_id)
+def render_visualization_page(result: PredictionResult) -> None:
     motif_df = pd.DataFrame(
         [
             {"Region": f"{region.start}-{region.end}", "Motif_Count": region.motif_count, "Motifs": region.motifs or "—"}
